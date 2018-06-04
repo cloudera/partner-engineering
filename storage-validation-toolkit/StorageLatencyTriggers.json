@@ -1,0 +1,16 @@
+[
+    {
+        "triggerName": "DataNode Storage Latency Concerning (>200ms)",
+        "triggerExpression": "IF (SELECT await_time_across_disks WHERE hostname=$HOSTNAME and hostname RLIKE 'w*.' and max(await_time_across_disks) > 200) DO health:concerning",
+        "streamThreshold": 0,
+        "enabled": "true",
+        "validityWindowInMs": 300000
+    },
+    {
+        "triggerName": "MasterNode Storage Latency Concerning (>100ms)",
+        "triggerExpression": "IF (SELECT await_time_across_disks WHERE hostname=$HOSTNAME and hostname RLIKE 'm*.' and max(await_time_across_disks) > 100) DO health:concerning",
+        "streamThreshold": 0,
+        "enabled": "true",
+        "validityWindowInMs": 300000
+    }
+]

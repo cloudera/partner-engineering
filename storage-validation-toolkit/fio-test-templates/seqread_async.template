@@ -1,0 +1,4 @@
+[seq_readerLABEL]
+rw=read
+directory=DATADIR/TESTDIR
+

@@ -1,0 +1,4 @@
+[rand_rwLABEL]
+rw=randrw
+directory=DATADIR/TESTDIR
+

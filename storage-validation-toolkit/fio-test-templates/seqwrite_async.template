@@ -1,0 +1,4 @@
+[seq_writerLABEL]
+rw=write
+directory=DATADIR/TESTDIR
+

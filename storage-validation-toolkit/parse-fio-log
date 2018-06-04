@@ -1,0 +1,83 @@
+#!/bin/bash
+##################################################################################################
+# 
+# Copyright (C) 2018 Cloudera, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+##################################################################################################
+
+grep -v -E "hostname\=|<.*>|Disk stats (.*):" $1 | \
+jq -r '[[.client_stats[] |
+    {hostname:.hostname, jobname:.jobname, 
+    rw:."job options".rw, directory:."job options".directory, 
+    datafile:"'"$1"'",
+    read_clat_ns_min:.read.clat_ns.min,
+    read_clat_ns_max:.read.clat_ns.max,
+    read_clat_ns_mean:.read.clat_ns.mean,
+    read_clat_ns_stddev:.read.clat_ns.stddev,
+    "read_clat_ns_percentile_1.000000":.read.clat_ns.percentile."1.000000",
+    "read_clat_ns_percentile_5.000000":.read.clat_ns.percentile."5.000000",
+    "read_clat_ns_percentile_10.000000":.read.clat_ns.percentile."10.000000",
+    "read_clat_ns_percentile_20.000000":.read.clat_ns.percentile."20.000000",
+    "read_clat_ns_percentile_30.000000":.read.clat_ns.percentile."30.000000",
+    "read_clat_ns_percentile_40.000000":.read.clat_ns.percentile."40.000000",
+    "read_clat_ns_percentile_50.000000":.read.clat_ns.percentile."50.000000",
+    "read_clat_ns_percentile_60.000000":.read.clat_ns.percentile."60.000000",
+    "read_clat_ns_percentile_70.000000":.read.clat_ns.percentile."70.000000",
+    "read_clat_ns_percentile_80.000000":.read.clat_ns.percentile."80.000000",
+    "read_clat_ns_percentile_90.000000":.read.clat_ns.percentile."90.000000",
+    "read_clat_ns_percentile_95.000000":.read.clat_ns.percentile."95.000000",
+    "read_clat_ns_percentile_99.000000":.read.clat_ns.percentile."99.000000",
+    "read_clat_ns_percentile_99.500000":.read.clat_ns.percentile."99.500000",
+    "read_clat_ns_percentile_99.900000":.read.clat_ns.percentile."99.900000",
+    "read_clat_ns_percentile_99.950000":.read.clat_ns.percentile."99.950000",
+    "read_clat_ns_percentile_99.990000":.read.clat_ns.percentile."99.990000",
+    "read_clat_ns_percentile_0.00":.read.clat_ns.percentile."0.00",
+    "read_io_bytes":.read.io_bytes,
+    "read_io_kbytes":.read.io_kbytes,
+    "read_bw":.read.bw,
+    "read_iops":.read.iops,
+    "read_runtime":.read.runtime,
+    "read_total_ios":.read.total_ios,
+    write_clat_ns_min:.write.clat_ns.min,
+    write_clat_ns_max:.write.clat_ns.max,
+    write_clat_ns_mean:.write.clat_ns.mean,
+    write_clat_ns_stddev:.write.clat_ns.stddev,
+    "write_clat_ns_percentile_1.000000":.write.clat_ns.percentile."1.000000",
+    "write_clat_ns_percentile_5.000000":.write.clat_ns.percentile."5.000000",
+    "write_clat_ns_percentile_10.000000":.write.clat_ns.percentile."10.000000",
+    "write_clat_ns_percentile_20.000000":.write.clat_ns.percentile."20.000000",
+    "write_clat_ns_percentile_30.000000":.write.clat_ns.percentile."30.000000",
+    "write_clat_ns_percentile_40.000000":.write.clat_ns.percentile."40.000000",
+    "write_clat_ns_percentile_50.000000":.write.clat_ns.percentile."50.000000",
+    "write_clat_ns_percentile_60.000000":.write.clat_ns.percentile."60.000000",
+    "write_clat_ns_percentile_70.000000":.write.clat_ns.percentile."70.000000",
+    "write_clat_ns_percentile_80.000000":.write.clat_ns.percentile."80.000000",
+    "write_clat_ns_percentile_90.000000":.write.clat_ns.percentile."90.000000",
+    "write_clat_ns_percentile_95.000000":.write.clat_ns.percentile."95.000000",
+    "write_clat_ns_percentile_99.000000":.write.clat_ns.percentile."99.000000",
+    "write_clat_ns_percentile_99.500000":.write.clat_ns.percentile."99.500000",
+    "write_clat_ns_percentile_99.900000":.write.clat_ns.percentile."99.900000",
+    "write_clat_ns_percentile_99.950000":.write.clat_ns.percentile."99.950000",
+    "write_clat_ns_percentile_99.990000":.write.clat_ns.percentile."99.990000",
+    "write_clat_ns_percentile_0.00":.write.clat_ns.percentile."0.00",
+    "write_io_bytes":.write.io_bytes,
+    "write_io_kbytes":.write.io_kbytes,
+    "write_bw":.write.bw,
+    "write_iops":.write.iops,
+    "write_runtime":.write.runtime,
+    "write_total_ios":.write.total_ios
+    }][] |
+    select(.jobname!="All clients")     
+    ]| (.[0] | to_entries | map(.key)), (.[] | [.[]]) | @csv'

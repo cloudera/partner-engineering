@@ -1,0 +1,113 @@
+#!/bin/bash
+##################################################################################################
+#
+# Copyright (C) 2018 Cloudera, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+##################################################################################################
+
+echo "Evaluating $1, Max=$2 Med=$3 IOPS=$4, MBPS=$5"
+
+IFS=, read -a rawheaders < $1
+i="0"
+
+for header in ${rawheaders[@]};
+do
+  header="${header%\"}"
+  header="${header#\"}"
+  header=${header/\./_}
+  eval header_idx_var="${header}_idx"
+  eval "$header_idx_var"="$i"
+  ((i++))
+done
+
+scale=4
+
+if [ -f $1 ]; then
+while IFS=, read -a val
+do
+  if [ "${val[$hostname_idx]//\"/}" != "hostname" ]; then
+     PASSFAIL="PASS"
+     FAILLIST=""
+     DATAFILE="${val[$datafile_idx]//\"/}"
+     READ50pct=$( echo "scale=$scale; ${val[$read_clat_ns_percentile_50_000000_idx]//\"/} /1000000"| bc  )
+     READ99=$( echo "scale=$scale; ${val[$read_clat_ns_percentile_99_000000_idx]//\"/} /1000000"| bc )
+     READMAX=$( echo "scale=$scale; ${val[$read_clat_ns_max_idx]//\"/} /1000000"| bc )
+     READBW=${val[$read_bw_idx]//\"/}
+     READIOPS=${val[$read_iops_idx]//\"/}
+     WRITE50pct=$( echo "scale=$scale; ${val[$write_clat_ns_percentile_50_000000_idx]//\"/} /1000000"| bc )
+     WRITE99=$( echo "scale=$scale; ${val[$write_clat_ns_percentile_99_000000_idx]//\"/} /1000000"| bc )
+     WRITEMAX=$( echo "scale=$scale; ${val[$write_clat_ns_max_idx]//\"/} /1000000"| bc )
+     WRITEBW=${val[$write_bw_idx]//\"/}
+     WRITEIOPS=${val[$write_iops_idx]//\"/}
+
+     if [ $2 -ne 0 ]; then
+        if [ $2 -lt $(( ${READ99%.*} )) ]; then
+           PASSFAIL="FAIL"
+           FAILLIST="$FAILLIST READ_LATENCY_99>$2"
+        fi        
+        if [ $2 -lt $(( ${WRITE99%.*} )) ]; then
+           PASSFAIL="FAIL"
+           FAILLIST="$FAILLIST WRITE_LATENCY_99>$2"
+        fi        
+     fi
+
+     if [ $3 -ne 0 ]; then
+        if [ $3 -lt $(( ${READ50pct%.*} )) ]; then
+           PASSFAIL="FAIL"
+           FAILLIST="$FAILLIST READ_LATENCY_MEDIAN>$3"
+        fi
+        if [ $3 -lt $(( ${WRITE50pct%.*} )) ]; then
+           PASSFAIL="FAIL"
+           FAILLIST="$FAILLIST WRITE_LATENCY_MEDIAN>$3"
+        fi
+     fi
+     
+     if [ $4 -ne 0 ]; then
+        TOTALIOPS=$(( ${READIOPS%.*} + ${WRITEIOPS%.*} ))
+        if [ ${TOTALIOPS} -ne 0 ] && [ $4 -gt $(( ${TOTALIOPS} )) ]; then
+           PASSFAIL="FAIL"
+           FAILLIST="$FAILLIST TOTAL_IOPS<$4"
+        fi
+     fi
+
+     if  [ $5 -ne 0 ]; then
+        TOTALBW=$(( ${READBW%.*} + ${WRITEBW%.*} ))
+        if [ ${TOTALBW} -ne 0 ] && [ $5 -gt $(( ${TOTALBW} )) ]; then
+           PASSFAIL="FAIL"
+           FAILLIST="$FAILLIST TOTAL_MBPS<$5"
+        fi
+     fi
+     
+
+     echo "$PASSFAIL[$FAILLIST],${val[$hostname_idx]//\"/}," \
+"${val[$datafile_idx]//\"/}," \
+"${val[$jobname_idx]//\"/}," \
+"${val[$rw_idx]//\"/}," \
+"${val[$directory_idx]//\"/}," \
+"${READ50pct}," \
+"${READ99}," \
+"${READMAX}," \
+"${READBW}," \
+"${READIOPS}," \
+"${WRITE50pct}," \
+"${WRITE99}," \
+"${WRITEMAX}," \
+"${WRITEBW}," \
+"${WRITEIOPS}"
+fi
+done < $1
+else
+   echo "FAIL [FILE_NOT_FOUND=$1]"
+fi

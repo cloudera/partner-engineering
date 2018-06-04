@@ -1,0 +1,32 @@
+#!/bin/bash
+##################################################################################################
+# 
+# Copyright (C) 2018 Cloudera, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+##################################################################################################
+
+if [ ! -d "$1" ]; then
+  echo "The first script argument must be a directory containing HBase confguration files"; exit
+fi
+
+{ 
+    for w in "workloada" "workloadb" "workloadc" "workloadd" "workloade" "workloadf"; do 
+      bin/ycsb load hbase20 -P workloads/$w -cp $1 -p table=ycsbtable -p columnfamily=family -p measurementtype=timeseries -p timeseries.granularity=20000 2>/dev/null; 
+      bin/ycsb run hbase20 -P workloads/$w -cp $1 -p table=ycsbtable -p columnfamily=family -p measurementtype=timeseries -p timeseries.granularity=20000 2>/dev/null; 
+    done 
+} | tee "hbase-ycsb-output.txt" | grep "Latency" | tee "hbase-ycsb-latency.txt"
+
+maxlat=$( grep "MaxLatency(us)" "hbase-ycsb-latency.txt" | cut -d, -f3 | sort -nr | head -n1 )
+if [ $maxlat -ge 200000 ]; then echo "FAIL[HBase_MaxLatency(${maxlat}us)>200000us]"; else echo "PASS[HBase_MaxLatency=${maxlat}us]"; fi | tee "hbase-ycsb.summary"

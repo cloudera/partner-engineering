@@ -1,0 +1,6 @@
+[rand_rwLABEL]
+fsync=1
+iodepth=1
+rw=randrw
+directory=DATADIR/TESTDIR
+

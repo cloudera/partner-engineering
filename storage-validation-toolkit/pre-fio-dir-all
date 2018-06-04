@@ -1,0 +1,46 @@
+#!/bin/bash
+##################################################################################################
+# 
+# Copyright (C) 2018 Cloudera, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+##################################################################################################
+
+# Include file: test-config
+. ./test-config
+
+for group in ${hostgroups[@]}; 
+do
+    eval dirsvar=( \${dirs_$group[@]} ) ;
+    commandlist=""
+    
+    for dir in ${dirsvar[@]};
+    do
+      commandlist="${commandlist} sudo bash -c 'mkdir $dir/$testdir; chown $testuser:$testuser $dir/$testdir;'; "
+    done
+    
+    # The following commands are used to install fio and iperf3 for further testing.  These commands have been tested on CentOS 7.4 and
+    # should work on CentOS 7.x and RedHat Enterprise Linux 7.x.  If you are using an earlier version of CentOS/RHEL, or if you are
+    # using a different distribution, these commands may need to be changed.
+    #
+    # Expected versions of files:
+    #  * fio 3.1 or greater
+    #  * iperf3 3.1.x or greater
+    #
+    # Note: epel-release is installed twice to update to the latest repository for EPEL: https://fedoraproject.org/wiki/EPEL
+
+    commandlist="${commandlist}sudo yum -y install epel-release; sudo yum -y install epel-release; sudo yum -y install fio iperf3; "
+
+    ./on-each-do test-files/${group}.list "$commandlist"
+done

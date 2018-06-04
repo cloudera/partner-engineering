@@ -1,0 +1,113 @@
+{
+    "flexibleLayout": true,
+    "name": "StorageMonitoringOverview",
+    "owner": "admin",
+    "suppressWarnings": false,
+    "userCreated": true,
+    "version": 2,
+    "viewPlots": [
+        {
+            "plot": {
+                "chartType": "scatter",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "__single_plot__",
+                "height": 300,
+                "hideIfNoSeries": false,
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Worker Disk Latency Summary (Limit 200ms)",
+                "tsquery": "SELECT await_time_across_disks where category=HOST and hostname rlike \"w.*\"",
+                "width": 1200,
+                "ymax": 300.0
+            },
+            "position": {
+                "column": 1,
+                "row": 21
+            }
+        },
+        {
+            "plot": {
+                "chartType": "histogram",
+                "description": "",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "__single_plot__",
+                "hideIfNoSeries": false,
+                "histogramCutPoints": [
+                    0.0,
+                    10.0,
+                    20.0,
+                    40.0,
+                    80.0,
+                    160.0
+                ],
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Master Disk Latency",
+                "tsquery": "select  max(await_time) where category = disk and logicalPartition = false AND clusterDisplayName RLIKE \"..*\" and hostname RLIKE \"m.*\"",
+                "width": 600
+            },
+            "position": {
+                "column": 1,
+                "row": 1
+            }
+        },
+        {
+            "plot": {
+                "chartType": "scatter",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "__single_plot__",
+                "height": 300,
+                "hideIfNoSeries": false,
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Master Disk Latency Summary (Limit 100ms)",
+                "tsquery": "SELECT await_time_across_disks where category=HOST and hostname rlike \"m.*\"",
+                "width": 1200,
+                "ymax": 150.0
+            },
+            "position": {
+                "column": 1,
+                "row": 9
+            }
+        },
+        {
+            "plot": {
+                "chartType": "histogram",
+                "description": "",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "__single_plot__",
+                "hideIfNoSeries": false,
+                "histogramCutPoints": [
+                    0.0,
+                    50.0,
+                    100.0,
+                    200.0,
+                    400.0,
+                    800.0,
+                    1600.0
+                ],
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": false,
+                "title": "Worker Disk Latency",
+                "tsquery": "select  max(await_time) where category = disk and logicalPartition = false AND clusterDisplayName RLIKE \"..*\" and hostname RLIKE \"w.*\"",
+                "width": 600
+            },
+            "position": {
+                "column": 13,
+                "row": 1
+            }
+        }
+    ]
+}

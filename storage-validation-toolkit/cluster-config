@@ -1,0 +1,46 @@
+# Copyright (C) 2018 Cloudera, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# IMPORTANT:
+# Comment the following line once you have edited this file to reflect the cluster under test.
+echo "You must edit the cluster-config file before running the scripts in this toolkit."; exit
+
+##################################################################################################
+# Edit this file to reflect the different unique configurations that are found in the cluster
+# Note: This file defines bash arrays to contain cluster configuration information.  It should be
+# sourced from the necessary script with source or . notation, not run directly.
+
+hostgroups=( "master1" "master2" "worker" "edge" )
+testdir="fio"
+testuser="cloudera"
+
+# There must be hosts_{group} and dirs_{group} variables defined for each entry in hostgroups above.
+# There must be a type_{group} variable defined as either "master" or "worker" to determine appropriate tests.
+
+hosts_master1=( "10.3.0.15" )
+dirs_master1=( "/data0" "/data1" "/data2" )
+type_master1="master"
+
+hosts_master2=( "10.3.0.16" "10.3.0.18" )
+dirs_master2=( "/data0" "/data1" "/data2" "/data3" )
+type_master2="master"
+
+hosts_worker=( "10.3.0.13" "10.3.0.14" "10.3.0.17" "10.3.0.19" )
+dirs_worker=( "/data0" "/data1" "/data2" "/data3" "/data4" "/data5" "/data6" "/data7" "/data8" "/data9" )
+type_worker="worker"
+
+hosts_edge=( "10.3.0.12" )
+dirs_edge=( "/data0" )
+type_edge="master"

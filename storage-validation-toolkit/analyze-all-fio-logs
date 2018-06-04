@@ -1,0 +1,111 @@
+#!/bin/bash
+##################################################################################################
+# 
+# Copyright (C) 2018 Cloudera, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+##################################################################################################
+
+# Include file: test-config
+. ./test-config
+
+for workload in ${master_workloads[@]};
+do
+  for worksize in ${master_worksizes[@]};
+  do
+    for group in ${hostgroups[@]}; 
+    do
+      eval grouptype=( \${type_${group}} )
+      if [ "$grouptype" = "master" ]; then
+        eval result="results/${workload}_${worksize}_${group}.json"
+        eval csv="results/${workload}_${worksize}_${group}.csv"
+        eval txt="results/${workload}_${worksize}_${group}.txt"
+
+        eval grouptype=( \${type_$group} )
+
+        eval max=( \${limit_$grouptype} )
+        eval med=( \${median_$grouptype} )
+        
+        eval iops=( \${iops_${grouptype}_${worksize}_${workload}} )
+        eval mbps=( \${mbps_${grouptype}_${worksize}_${workload}} )
+
+        ./parse-fio-log ${result} > ${csv}
+        ./eval-csv-log ${csv} ${max:-0} ${med:-0} ${iops:-0} ${mbps:-0} | tee ${txt}
+      fi
+    done
+  done
+done
+
+for workload in ${general_workloads[@]};
+do
+  for worksize in ${general_worksizes[@]};
+  do
+    for group in ${hostgroups[@]}; 
+    do
+        eval result="results/${workload}_${worksize}_${group}.json"
+        eval csv="results/${workload}_${worksize}_${group}.csv"
+        eval txt="results/${workload}_${worksize}_${group}.txt"
+
+        eval grouptype=( \${type_$group} )
+
+        eval max=( \${limit_$grouptype} )
+        eval med=( \${median_$grouptype} )
+        
+        eval iops=( \${iops_${grouptype}_${worksize}_${workload}} )
+        eval mbps=( \${mbps_${grouptype}_${worksize}_${workload}} )
+
+        ./parse-fio-log ${result} > ${csv}
+        ./eval-csv-log ${csv} ${max:-0} ${med:-0} ${iops:-0} ${mbps:-0} | tee ${txt}
+    done
+  done
+done
+
+runstamp="$(date +"%Y%m%d%H%M%S")"
+summaryfile="results/storage-test-${runstamp}.summary"
+summaryarchive="results/storage-test-${runstamp}.tgz"
+
+{
+  echo "##################################################################################################"
+  echo "# Cluster Config: "
+} | tee -a $summaryfile
+cat cluster-config | grep "^[^#\.]" | tee -a $summaryfile
+
+{
+  echo "##################################################################################################"
+  echo "# Test Config: "
+} | tee -a $summaryfile
+cat test-config | grep "^[^#\.]" | tee -a $summaryfile
+
+
+{
+  echo "##################################################################################################"
+  echo "# Tests Passed: "
+} | tee -a $summaryfile
+cat results/*.txt | grep "PASS\[" | tee -a $summaryfile
+
+{
+  echo "##################################################################################################"
+  echo "# Tests Failed: "
+} | tee -a $summaryfile
+cat results/*.txt | grep "FAIL\[" | tee -a $summaryfile
+
+{
+  echo "##################################################################################################"
+  echo "# Summary "
+  echo "# Tests Passed: $(cat results/*.txt | grep -c "PASS")"
+  echo "# Tests Failed: $(cat results/*.txt | grep -c "FAIL")"
+} | tee -a $summaryfile
+
+find results -regextype posix-extended -regex '(^.*\.(txt|json)$|'"$summaryfile"')' | tar -czf $summaryarchive --files-from=-
+

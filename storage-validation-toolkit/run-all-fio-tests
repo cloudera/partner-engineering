@@ -1,0 +1,93 @@
+#!/bin/bash
+##################################################################################################
+# 
+# Copyright (C) 2018 Cloudera, Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+##################################################################################################
+
+# Include file: test-config
+. ./test-config
+
+# Clear previous results
+rm -f results/*.json
+rm -f results/*.html
+rm -f results/*.txt
+
+for workload in ${general_workloads[@]};
+do
+  for worksize in ${general_worksizes[@]};
+  do
+    commandlist=""
+    for group in ${hostgroups[@]}; 
+    do
+      eval config="test-files/${workload}_${worksize}_${group}.ini"
+      eval result="results/${workload}_${worksize}_${group}.json"
+      eval hostlist="test-files/${group}.list"
+      commandlist="${commandlist}( echo START ${workload}/${worksize}/${group}; fio --client=${hostlist} --output-format=json --output=${result} ${config} > /dev/null 2>&1 ; echo END ${workload}/${worksize}/${group}; ) & " 
+    done
+    
+    echo "Workload: ${workload}, IO Size: ${worksize}"
+    echo "Command: ${commandlist}"
+    echo "Start at:"
+    date --iso-8601=s
+    
+    eval "${commandlist}"
+    
+    sleep 5
+    jobs -r
+    wait
+    
+    echo "Complete at:"
+    date --iso-8601=s
+    sleep $testdelay
+  done
+done
+
+for workload in ${master_workloads[@]};
+do
+  for worksize in ${master_worksizes[@]};
+  do
+    commandlist=""
+    for group in ${hostgroups[@]}; 
+    do
+      eval grouptype=( \${type_${group}} )
+      if [ "$grouptype" = "master" ]; then
+        eval config="test-files/${workload}_${worksize}_${group}.ini"
+        eval result="results/${workload}_${worksize}_${group}.json"
+        eval hostlist="test-files/${group}.list"
+        commandlist="${commandlist}( echo START ${workload}/${worksize}/${group}; fio --client=${hostlist} --output-format=json --output=${result} ${config} > /dev/null 2>&1 ; echo END ${workload}/${worksize}/${group}; ) & " 
+      fi;
+    done
+    
+    echo "Workload: ${workload}, IO Size: ${worksize}"
+    echo "Command: ${commandlist}"
+    echo "Start at:"
+    date --iso-8601=s
+    
+    eval "${commandlist}"
+    
+    sleep 5
+    jobs -r
+    wait
+    
+    echo "Complete at:"
+    date --iso-8601=s
+    # Sleep $testdelay except on last test
+    if ! { [ ${master_worksizes[-1]} = $worksize ] && [ ${master_workloads[-1]} = $workload  ]; } then
+      echo "Pausing $testdelay seconds between tests..."
+      sleep $testdelay
+    fi
+  done
+done

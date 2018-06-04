@@ -1,0 +1,9 @@
+[global]
+size=1g
+time_based=1
+runtime=TESTTIME
+direct=1
+ioengine=libaio
+iodepth=OSQD
+bs=32k
+

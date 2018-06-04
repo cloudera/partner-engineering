@@ -1,0 +1,115 @@
+{
+    "flexibleLayout": true,
+    "name": "StorageMonitoringDetails",
+    "owner": "admin",
+    "suppressWarnings": false,
+    "userCreated": true,
+    "version": 2,
+    "viewPlots": [
+        {
+            "plot": {
+                "chartType": "stackarea",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "hostname",
+                "height": 250,
+                "hideIfNoSeries": false,
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Disk Bytes",
+                "tsquery": "select  read_bytes_rate,write_bytes_rate where category = disk and logicalPartition = false AND clusterDisplayName RLIKE \"..*\"",
+                "width": 300
+            },
+            "position": {
+                "column": 1,
+                "row": 3
+            }
+        },
+        {
+            "plot": {
+                "chartType": "stackarea",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "hostname",
+                "height": 250,
+                "hideIfNoSeries": false,
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Disk IOPS",
+                "tsquery": "select  read_ios_rate,write_ios_rate where category = disk and logicalPartition = false AND clusterDisplayName RLIKE \"..*\"",
+                "width": 300
+            },
+            "position": {
+                "column": 2,
+                "row": 3
+            }
+        },
+        {
+            "plot": {
+                "chartType": "stackarea",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "hostname",
+                "height": 250,
+                "hideIfNoSeries": false,
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Disk Queue",
+                "tsquery": "select  average_queue_length where category = disk and logicalPartition = false AND clusterDisplayName RLIKE \"..*\"",
+                "width": 300
+            },
+            "position": {
+                "column": 3,
+                "row": 3
+            }
+        },
+        {
+            "plot": {
+                "chartType": "line",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "hostname",
+                "height": 250,
+                "hideIfNoSeries": false,
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Disk Service",
+                "tsquery":"select service_time where category = disk and logicalPartition = false AND clusterDisplayName RLIKE \"..*\"",
+                "width": 300
+            },
+            "position": {
+                "column": 4,
+                "row": 3
+            }
+        },
+        {
+            "plot": {
+                "chartType": "line",
+                "errorStyle": "auto",
+                "expandRange": false,
+                "facetting": "hostname",
+                "height": 250,
+                "hideIfNoSeries": false,
+                "interpolation": "linear",
+                "mustUseDesiredRollup": false,
+                "scale": "linear",
+                "showDescription": true,
+                "title": "Disk Await (Limit 100ms Master Nodes, 200ms Worker Nodes)",
+                "tsquery":"select await_time where category = disk and logicalPartition = false AND clusterDisplayName RLIKE \"..*\"",
+                "width": 300
+            },
+            "position": {
+                "column": 5,
+                "row": 3
+            }
+        }
+    ]
+}
