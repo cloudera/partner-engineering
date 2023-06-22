@@ -27,7 +27,7 @@ do
     
     for dir in ${dirsvar[@]};
     do
-      commandlist="${commandlist} sudo bash -c 'mkdir $dir/$testdir; chown $testuser:$testuser $dir/$testdir;'; "
+      commandlist="${commandlist} sudo bash -c 'mkdir $dir/$testdir; chown $testuser:$testgroup $dir/$testdir;'; "
     done
     
     # The following commands are used to install fio and iperf3 for further testing.  These commands have been tested on CentOS 7.4 and

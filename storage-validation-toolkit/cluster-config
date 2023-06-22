@@ -25,6 +25,7 @@ echo "You must edit the cluster-config file before running the scripts in this t
 hostgroups=( "master1" "master2" "worker" "edge" )
 testdir="fio"
 testuser="cloudera"
+testgroup="cloudera"
 
 # There must be hosts_{group} and dirs_{group} variables defined for each entry in hostgroups above.
 # There must be a type_{group} variable defined as either "master" or "worker" to determine appropriate tests.
