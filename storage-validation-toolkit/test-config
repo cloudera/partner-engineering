@@ -35,14 +35,14 @@ median_worker=50
 iops_worker_32k_seqread_async=100
 iops_worker_32k_seqwrite_async=100
 
-mbps_worker_32k_seqread_async=30
-mbps_worker_32k_seqwrite_async=30
+mbps_worker_32k_seqread_async=30720
+mbps_worker_32k_seqwrite_async=30720
 
 iops_master_4k_randrw_sync=100
 iops_master_4k_randrw_async=500
 
-mbps_master_32k_seqread_async=30
-mbps_master_32k_seqwrite_async=30
+mbps_master_32k_seqread_async=30720
+mbps_master_32k_seqwrite_async=30720
 
 ##################################################################################################
 # The following variables define the target run time for each test, and the delay between tests in
